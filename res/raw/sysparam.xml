@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sysparam version="1">
+
+    <devinfo
+        id="12345abcdeABCDE"
+        model="YSAT-200"
+        chargereportperiod="3"
+        heartbeatperiod="10"
+        aeskey="12345678abcdefghABCDEFGH"
+        rsakey="12345678abcdefghABCDEFGH" />
+    
+    <iadsinfo
+        host="10.166.89.17"
+        port="8080" />
+ 
+</sysparam>
