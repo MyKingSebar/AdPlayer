@@ -124,8 +124,6 @@ public class ChargeManager {
 				mLogger.i("Token from SMS is null.");
 				return null;
 			}
-
-			SysParamManager.getInstance().setSmsToken(token);
 		}
 
 		if (token != null) {
@@ -157,8 +155,6 @@ public class ChargeManager {
 					return null;
 				}
 
-				SysParamManager.getInstance().setSmsToken(token);
-				
 				resp = HttpHelper.postServerData(servicetype, host, token, encryptmsg);
 				if (resp == null) {
 					mLogger.i("SMS response is null, servicetype = " + servicetype + ".");

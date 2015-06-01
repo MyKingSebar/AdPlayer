@@ -275,7 +275,29 @@ public class DbHelper {
 			mLogger.i("No content value (System info) need to be updated.");
 		}
 	}
-	
+
+	public void updatePgmInfo(String id, String sha1, String data) {
+		if (id == null) {
+			mLogger.i("Program id is null.");
+			return;
+		}
+		if (sha1 == null) {
+			mLogger.i("Program sha1 is null.");
+			return;
+		}
+		if (data == null) {
+			mLogger.i("Program data is null.");
+			return;
+		}
+
+		ContentValues cv = new ContentValues();
+		cv.put(DbConstants.SPT_PGMID, id);
+		cv.put(DbConstants.SPT_PGMSHA1, sha1);
+		cv.put(DbConstants.SPT_PGMJSONDATA, data);
+		mContentResolver.update(ContentUris.withAppendedId(
+				DbConstants.CONTENTURI_SYSPARAM, DEFAULT_SYSPARAM_DBID), cv, null, null);
+	}
+
 	public DbChargeInfo[] getChargeInfo() {
 		Cursor c = mContentResolver.query(DbConstants.CONTENTURI_CHARGEINFO, null, null, null, null);
 		
@@ -310,7 +332,8 @@ public class DbHelper {
 		if (infoLst != null) {
 			int size = infoLst.size();
 			if (size > 0) {
-				return (DbChargeInfo[])infoLst.toArray();
+				DbChargeInfo[] chargeinfo = new DbChargeInfo[size];
+				return (DbChargeInfo[])infoLst.toArray(chargeinfo);
 			} else {
 				mLogger.i("Size of charge info is " + size + ".");
 			}

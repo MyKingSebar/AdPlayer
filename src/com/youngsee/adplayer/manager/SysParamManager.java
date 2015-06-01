@@ -63,7 +63,7 @@ public class SysParamManager {
 			mSysParam.devinfo.rsakey = dbsysparam.rsakey;
 			mSysParam.devinfo.pgmid = dbsysparam.pgmid;
 			mSysParam.devinfo.pgmsha1 = dbsysparam.pgmsha1;
-			mSysParam.devinfo.pgmdata = dbsysparam.pgmjsondata;
+			mSysParam.devinfo.pgmjsondata = dbsysparam.pgmjsondata;
 			
 			if (mSysParam.iadsinfo == null) {
 				mSysParam.iadsinfo = new IadsInfo();
@@ -150,9 +150,9 @@ public class SysParamManager {
 		}
 		mSysParam.iadsinfo.host = xmlsysparam.iadshost;
 		mSysParam.iadsinfo.port = xmlsysparam.iadsport;
-		
+
 		DbHelper.getInstance().setSysParam(isinitial, xmlsysparam, softwareversion, kernelversion);
-		
+
 		mReadWriteLock.writeLock().unlock();
 	}
 
@@ -334,6 +334,21 @@ public class SysParamManager {
 		return pgmsha1;
 	}
 
+	public String getPgmJsonData() {
+		String pgmjsondata = null;
+		
+		mReadWriteLock.readLock().lock();
+
+		if ((mSysParam.devinfo != null)
+				&& (mSysParam.devinfo.pgmjsondata != null)) {
+			pgmjsondata = new String(mSysParam.devinfo.pgmjsondata);
+		}
+
+		mReadWriteLock.readLock().unlock();
+
+		return pgmjsondata;
+	}
+
 	public IadsInfo getIadsInfo() {
 		IadsInfo iadsinfo = null;
 
@@ -401,7 +416,7 @@ public class SysParamManager {
 		if (mSysParam.devinfo == null) {
 			mSysParam.devinfo = new DevInfo();
 		}
-		mSysParam.devinfo.iadstoken = new String(token);
+		mSysParam.devinfo.iadstoken = token;
 		
 		DbHelper.getInstance().updateIadsToken(token);
 
@@ -419,7 +434,7 @@ public class SysParamManager {
 		if (mSysParam.devinfo == null) {
 			mSysParam.devinfo = new DevInfo();
 		}
-		mSysParam.devinfo.smstoken = new String(token);
+		mSysParam.devinfo.smstoken = token;
 		
 		DbHelper.getInstance().updateSmsToken(token);
 
@@ -437,7 +452,7 @@ public class SysParamManager {
 		if (mSysParam.devinfo == null) {
 			mSysParam.devinfo = new DevInfo();
 		}
-		mSysParam.devinfo.ampstoken = new String(token);
+		mSysParam.devinfo.ampstoken = token;
 		
 		DbHelper.getInstance().updateAmpsToken(token);
 
@@ -457,7 +472,7 @@ public class SysParamManager {
 		}
 		String smshost = info.getSmsHost();
 		if (smshost != null) {
-			mSysParam.smsinfo.host = new String(smshost);
+			mSysParam.smsinfo.host = smshost;
 		}
 		
 		if (mSysParam.ampsinfo == null) {
@@ -465,7 +480,7 @@ public class SysParamManager {
 		}
 		String ampshost = info.getAmpsHost();
 		if (ampshost != null) {
-			mSysParam.ampsinfo.host = new String(ampshost);
+			mSysParam.ampsinfo.host = ampshost;
 		}
 
 		DbHelper.getInstance().updateServerInfo(info);
@@ -484,20 +499,16 @@ public class SysParamManager {
 		if (mSysParam.devinfo == null) {
 			mSysParam.devinfo = new DevInfo();
 		}
-		String terminalgroup = info.getTerminalGroup();
-		if (terminalgroup != null) {
-			mSysParam.devinfo.terminalgroup = new String(terminalgroup);
-		}
-		String terminalname = info.getTerminalName();
-		if (terminalname != null) {
-			mSysParam.devinfo.terminalname = new String(terminalname);
-		}
+		mSysParam.devinfo.terminalgroup = info.getTerminalGroup();
+		mSysParam.devinfo.terminalname = info.getTerminalName();
+
 		int chargereportperiod = info.getChargeReportPeriod();
 		if (chargereportperiod >= 1) {
 			mSysParam.devinfo.chargereportperiod = chargereportperiod;
 		} else {
 			mLogger.i("Invalid charge report period, chargereportperiod = " + chargereportperiod + ".");
 		}
+
 		int heartbeatperiod = info.getHeartbeatPeriod();
 		if (heartbeatperiod >= 1) {
 			mSysParam.devinfo.heartbeatperiod = heartbeatperiod;
@@ -510,24 +521,17 @@ public class SysParamManager {
 		}
 		FtpParam ftpparam = info.getFtpParam();
 		if (ftpparam != null) {
-			String host = ftpparam.getHost();
-			if (host != null) {
-				mSysParam.ftpinfo.host = new String(host);
-			}
+			mSysParam.ftpinfo.host = ftpparam.getHost();
+
 			int port = ftpparam.getPort();
 			if (port >= 0) {
 				mSysParam.ftpinfo.port = port;
 			} else {
 				mLogger.i("Invalid FTP port, port = " + port + ".");
 			}
-			String username = ftpparam.getUsername();
-			if (username != null) {
-				mSysParam.ftpinfo.username = new String(username);
-			}
-			String password = ftpparam.getPassword();
-			if (password != null) {
-				mSysParam.ftpinfo.password = new String(password);
-			}
+
+			mSysParam.ftpinfo.username = ftpparam.getUsername();
+			mSysParam.ftpinfo.password = ftpparam.getPassword();
 		}
 		
 		DbHelper.getInstance().updateSysInfo(info);
@@ -535,4 +539,31 @@ public class SysParamManager {
 		mReadWriteLock.writeLock().unlock();
 	}
 
+	public void setPgmInfo(String id, String sha1, String data) {
+		if (id == null) {
+			mLogger.i("Failed to set program info, id is null.");
+			return;
+		}
+		if (sha1 == null) {
+			mLogger.i("Failed to set program info, sha1 is null.");
+			return;
+		}
+		if (data == null) {
+			mLogger.i("Failed to set program info, data is null.");
+			return;
+		}
+
+		mReadWriteLock.writeLock().lock();
+		
+		if (mSysParam.devinfo == null) {
+			mSysParam.devinfo = new DevInfo();
+		}
+		mSysParam.devinfo.pgmid = id;
+		mSysParam.devinfo.pgmsha1 = sha1;
+		mSysParam.devinfo.pgmjsondata = data;
+		
+		DbHelper.getInstance().updatePgmInfo(id, sha1, data);
+		
+		mReadWriteLock.writeLock().unlock();
+	}
 }

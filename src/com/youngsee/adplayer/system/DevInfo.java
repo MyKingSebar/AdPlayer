@@ -32,8 +32,8 @@ public class DevInfo {
 	public String pgmid;
 	/** Program sha1 */
 	public String pgmsha1;
-	/** Program data */
-	public String pgmdata;
+	/** Program json data */
+	public String pgmjsondata;
 
 	public DevInfo() {
 		id = null;
@@ -51,7 +51,7 @@ public class DevInfo {
 		rsakey = null;
 		pgmid = null;
 		pgmsha1 = null;
-		pgmdata = null;
+		pgmjsondata = null;
 	}
 
 	public DevInfo(DevInfo info) {
@@ -70,7 +70,7 @@ public class DevInfo {
 		rsakey = (info.rsakey != null) ? new String(info.rsakey) : null;
 		pgmid = (info.pgmid != null) ? new String(info.pgmid) : null;
 		pgmsha1 = (info.pgmsha1 != null) ? new String(info.pgmsha1) : null;
-		pgmdata = (info.pgmdata != null) ? new String(info.pgmdata) : null;
+		pgmjsondata = (info.pgmjsondata != null) ? new String(info.pgmjsondata) : null;
 	}
 
 }

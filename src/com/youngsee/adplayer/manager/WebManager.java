@@ -32,6 +32,7 @@ import com.youngsee.adplayer.util.JsonHelper;
 import com.youngsee.adplayer.util.Logger;
 import com.youngsee.adplayer.util.MessageHelper;
 import com.youngsee.adplayer.util.NonceUtil;
+import com.youngsee.adplayer.util.Sha1Util;
 import com.youngsee.adplayer.util.SysInfoHelper;
 import com.youngsee.adplayer.util.TimestampUtil;
 import com.youngsee.adplayer.util.WebCmdHelper;
@@ -63,7 +64,7 @@ public class WebManager {
 	}
 	
 	private WebManager() {
-		mHandlerThread = new HandlerThread("webmgr_thread");
+		mHandlerThread = new HandlerThread("webmgr_hthd");
 		mHandlerThread.start();
 		mHandler = new MyHandler(mHandlerThread.getLooper());
 		
@@ -170,18 +171,7 @@ public class WebManager {
 			return -1;
 		}
 	}
-	
-	private void saveServerToken(int servertype, String token) {
-		switch (servertype) {
-		case Constants.SERVERTYPE_IADS:
-			SysParamManager.getInstance().setIadsToken(token);
-		case Constants.SERVERTYPE_AMPS:
-			SysParamManager.getInstance().setAmpsToken(token);
-		default:
-			mLogger.i("Server type is incorrect, servertype = " + servertype + ".");
-		}
-	}
-	
+
 	private String requestServerData(int servicetype, String host, String deviceid, String reqstr) {
 		if (!isServiceTypeValid(servicetype)) {
 			mLogger.e("Service type is invalid, servicetype = " + servicetype + ".");
@@ -216,8 +206,6 @@ public class WebManager {
 				mLogger.i("Token from server(servertype=" + servertype + ") is null.");
 				return null;
 			}
-			
-			saveServerToken(servertype, token);
 		}
 
 		if (token != null) {
@@ -254,8 +242,6 @@ public class WebManager {
 					mLogger.i("Token from server(servertype=" + servertype + ") is null.");
 					return null;
 				}
-				
-				saveServerToken(servertype, token);
 
 				resp = HttpHelper.postServerData(servicetype, host, token, encryptmsg);
 				if (resp == null) {
@@ -375,10 +361,12 @@ public class WebManager {
 		reqdata.setCpu(SysInfoHelper.getCpuUsage());
 		reqdata.setMemory(SysInfoHelper.getMemoryUsage());
 		
-		PgmInfo pgminfo = new PgmInfo();
-		pgminfo.setId(SysParamManager.getInstance().getPgmId());
-		pgminfo.setSha1(SysParamManager.getInstance().getPgmSha1());
-		reqdata.setPgmInfo(pgminfo);
+		String pgmid = SysParamManager.getInstance().getPgmId();
+		if (pgmid != null) {
+			PgmInfo pgminfo = new PgmInfo();
+			pgminfo.setId(pgmid);
+			reqdata.setPgmInfo(pgminfo);
+		}
 		
 		if (FtpHelper.getInstance().ftpDownloadIsWorking()) {
 			DlFileInfo dlfileinfo = new DlFileInfo();
@@ -447,11 +435,24 @@ public class WebManager {
 			mLogger.i("Response string of program list info is null.");
 			return false;
 		}
+		mLogger.i("Downloaded program list:");
+		mLogger.i(respstr);
 		
-		PgmListInfoResp respdata = JsonHelper.getObject(respstr, PgmListInfoResp.class);
-		if (respdata == null) {
-			mLogger.i("Response data of program list info is null.");
-			return false;
+		String respstrsha1 = Sha1Util.getSignature(respstr);
+		
+		String currentpgmsha1 = SysParamManager.getInstance().getPgmSha1();
+		if ((currentpgmsha1 == null) || !currentpgmsha1.equals(respstrsha1)) {
+			PgmListInfoResp respdata = JsonHelper.getObject(respstr, PgmListInfoResp.class);
+			if (respdata == null) {
+				mLogger.i("Response data of program list info is null.");
+				return false;
+			}
+
+			SysParamManager.getInstance().setPgmInfo(respdata.getPgmId(), respstrsha1, respstr);
+			
+			ProgramManager.getInstance().updatePgmList(respdata);
+		} else {
+			mLogger.i("Current program sha1 equals the one of downloaded program, just ignore...");
 		}
 
 		return true;
