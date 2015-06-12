@@ -442,7 +442,7 @@ public class FtpHelper {
 
     	mDLPrgMaterialThreadHandler.addToDlQueue(fileList);
     }
-    
+
     /**
      * 终止所有FTP下载线程
      */
@@ -807,6 +807,11 @@ public class FtpHelper {
             	mLogger.i("Tried to release some material space...");
                 if (AdApplication.getInstance().releaseMaterialSpace(lFileSize)) {
                 	mLogger.i("Succeeded to release.");
+                	if (localFolder.getUsableSpace() < lFileSize) {
+                		mLogger.i("No enough space can be found. Please check it.");
+                    	closeConnection(mClient);
+                        return false;
+                	}
                 } else {
                 	mLogger.i("Failed to release.");
                 	closeConnection(mClient);

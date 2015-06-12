@@ -107,6 +107,12 @@ public class AdProvider extends ContentProvider {
 
 		switch (s_urlMatcher.match(uri)) {
 		case URL_SYSPARAM:
+			if (!values.containsKey(DbConstants.SPT_SCREENWIDTH)) {
+				values.put(DbConstants.SPT_SCREENWIDTH, -1);
+			}
+			if (!values.containsKey(DbConstants.SPT_SCREENHEIGHT)) {
+				values.put(DbConstants.SPT_SCREENHEIGHT, -1);
+			}
 			if (!values.containsKey(DbConstants.SPT_CHARGEREPORTPERIOD)) {
 				values.put(DbConstants.SPT_CHARGEREPORTPERIOD, -1);
 			}

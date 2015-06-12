@@ -48,6 +48,8 @@ public class DbHelper {
 			param.devicemodel = c.getString(c.getColumnIndex(DbConstants.SPT_DEVICEMODEL));
 			param.softwareversion = c.getString(c.getColumnIndex(DbConstants.SPT_SOFTWAREVERSION));
 			param.kernelversion = c.getString(c.getColumnIndex(DbConstants.SPT_KERNELVERSION));
+			param.screenwidth = c.getInt(c.getColumnIndex(DbConstants.SPT_SCREENWIDTH));
+			param.screenheight = c.getInt(c.getColumnIndex(DbConstants.SPT_SCREENHEIGHT));
 			param.terminalgroup = c.getString(c.getColumnIndex(DbConstants.SPT_TERMINALGROUP));
 			param.terminalname = c.getString(c.getColumnIndex(DbConstants.SPT_TERMINALNAME));
 			param.chargereportperiod = c.getInt(c.getColumnIndex(DbConstants.SPT_CHARGEREPORTPERIOD));
@@ -87,7 +89,7 @@ public class DbHelper {
 	}
 	
 	public void setSysParam(boolean isinitial, XmlSysParam xmlsysparam, String softwareversion,
-			String kernelversion) {
+			String kernelversion, int screenwidth, int screenheight) {
 		ContentValues cv = new ContentValues();
 		if (xmlsysparam != null) {
 			if (xmlsysparam.deviceid != null) {
@@ -120,6 +122,12 @@ public class DbHelper {
 		}
 		if (kernelversion != null) {
 			cv.put(DbConstants.SPT_KERNELVERSION, kernelversion);
+		}
+		if (screenwidth != -1) {
+			cv.put(DbConstants.SPT_SCREENWIDTH, screenwidth);
+		}
+		if (screenheight != -1) {
+			cv.put(DbConstants.SPT_SCREENHEIGHT, screenheight);
 		}
 		
 		if (cv.size() > 0) {
@@ -154,6 +162,30 @@ public class DbHelper {
 
 		ContentValues cv = new ContentValues();
 		cv.put(DbConstants.SPT_KERNELVERSION, version);
+		mContentResolver.update(ContentUris.withAppendedId(
+				DbConstants.CONTENTURI_SYSPARAM, DEFAULT_SYSPARAM_DBID), cv, null, null);
+	}
+	
+	public void updateScreenWidth(int width) {
+		if (width < 0) {
+			mLogger.i("Screen width is less than zore.");
+			return;
+		}
+
+		ContentValues cv = new ContentValues();
+		cv.put(DbConstants.SPT_SCREENWIDTH, width);
+		mContentResolver.update(ContentUris.withAppendedId(
+				DbConstants.CONTENTURI_SYSPARAM, DEFAULT_SYSPARAM_DBID), cv, null, null);
+	}
+	
+	public void updateScreenHeight(int height) {
+		if (height < 0) {
+			mLogger.i("Screen height is less than zore.");
+			return;
+		}
+
+		ContentValues cv = new ContentValues();
+		cv.put(DbConstants.SPT_SCREENHEIGHT, height);
 		mContentResolver.update(ContentUris.withAppendedId(
 				DbConstants.CONTENTURI_SYSPARAM, DEFAULT_SYSPARAM_DBID), cv, null, null);
 	}
@@ -244,7 +276,7 @@ public class DbHelper {
 		}
 		
 		int heartbeatperiod = info.getHeartbeatPeriod();
-		if (heartbeatperiod >= 1) {
+		if (heartbeatperiod != 1) {
 			cv.put(DbConstants.SPT_HEARTBEATPERIOD, heartbeatperiod);
 		}
 		
@@ -289,11 +321,22 @@ public class DbHelper {
 			mLogger.i("Program data is null.");
 			return;
 		}
+		
+		byte[] pgmjsondata = null;
+		try {
+			pgmjsondata = data.getBytes(Constants.DEFAULT_CHARSET);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		if (pgmjsondata == null) {
+			mLogger.i("Program bytes data is null.");
+			return;
+		}
 
 		ContentValues cv = new ContentValues();
 		cv.put(DbConstants.SPT_PGMID, id);
 		cv.put(DbConstants.SPT_PGMSHA1, sha1);
-		cv.put(DbConstants.SPT_PGMJSONDATA, data);
+		cv.put(DbConstants.SPT_PGMJSONDATA, pgmjsondata);
 		mContentResolver.update(ContentUris.withAppendedId(
 				DbConstants.CONTENTURI_SYSPARAM, DEFAULT_SYSPARAM_DBID), cv, null, null);
 	}
@@ -347,24 +390,21 @@ public class DbHelper {
 		if (publishid == null) {
 			mLogger.i("Publish id is null.");
 			return;
-		}
-		if (playdate == null) {
+		} else if (playdate == null) {
 			mLogger.i("Play date is null.");
 			return;
-		}
-		if (totalplaytimes < 1) {
+		} else if (totalplaytimes < 0) {
 			mLogger.i("Total play times is invalid, totalplaytimes = " + totalplaytimes + ".");
 			return;
-		}
-		if (currentplaytimes < 1) {
+		} else if (currentplaytimes < 1) {
 			mLogger.i("Current play times is invalid, currentplaytimes = " + currentplaytimes + ".");
 			return;
 		}
 
 		StringBuilder sb = new StringBuilder();
-		sb.append(DbConstants.CIT_PUBLISHID).append("=").append(publishid);
+		sb.append(DbConstants.CIT_PUBLISHID).append("='").append(publishid).append("'");
 		sb.append(" AND ");
-		sb.append(DbConstants.CIT_PLAYDATE).append("=").append(playdate);
+		sb.append(DbConstants.CIT_PLAYDATE).append("='").append(playdate).append("'");
 		
 		String where = sb.toString();
 		Cursor c = mContentResolver.query(DbConstants.CONTENTURI_CHARGEINFO, null, where, null, null);
@@ -408,13 +448,40 @@ public class DbHelper {
 					|| ((datemillis == currentdatemillis)
 					&& (info.currentplaytimes >= info.totalplaytimes) )) {
 				StringBuilder sb = new StringBuilder();
-				sb.append(DbConstants.CIT_PUBLISHID).append("=").append(info.publishid);
+				sb.append(DbConstants.CIT_PUBLISHID).append("='").append(info.publishid).append("'");
 				sb.append(" AND ");
-				sb.append(DbConstants.CIT_PLAYDATE).append("=").append(info.playdate);
+				sb.append(DbConstants.CIT_PLAYDATE).append("='").append(info.playdate).append("'");
 				
 				mContentResolver.delete(DbConstants.CONTENTURI_CHARGEINFO, sb.toString(), null);
 			}
 		}
+	}
+	
+	public int getPgmCurrentPlayTimes(String publishid, String playdate) {
+		if (publishid == null) {
+			mLogger.i("Publish id is null.");
+			return 0;
+		} else if (playdate == null) {
+			mLogger.i("Play date is null.");
+			return 0;
+		}
+
+		int currentplaytimes = 0;
+
+		StringBuilder sb = new StringBuilder();
+		sb.append(DbConstants.CIT_PUBLISHID).append("='").append(publishid).append("'");
+		sb.append(" AND ");
+		sb.append(DbConstants.CIT_PLAYDATE).append("='").append(playdate).append("'");
+
+		String where = sb.toString();
+		Cursor c = mContentResolver.query(DbConstants.CONTENTURI_CHARGEINFO, null, where, null, null);
+		if (c.moveToFirst()) {
+			currentplaytimes = c.getInt(c.getColumnIndex(DbConstants.CIT_CURRENTPLAYTIMES));
+		}
+		
+		c.close();
+		
+		return currentplaytimes;
 	}
 
 }

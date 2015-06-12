@@ -52,6 +52,8 @@ public class SysParamManager {
 			mSysParam.devinfo.model = dbsysparam.devicemodel;
 			mSysParam.devinfo.softwareversion = dbsysparam.softwareversion;
 			mSysParam.devinfo.kernelversion = dbsysparam.kernelversion;
+			mSysParam.devinfo.screenwidth = dbsysparam.screenwidth;
+			mSysParam.devinfo.screenheight = dbsysparam.screenheight;
 			mSysParam.devinfo.terminalgroup = dbsysparam.terminalgroup;
 			mSysParam.devinfo.terminalname = dbsysparam.terminalname;
 			mSysParam.devinfo.chargereportperiod = dbsysparam.chargereportperiod;
@@ -116,6 +118,24 @@ public class SysParamManager {
 				mLogger.i("System kernel version is " + syskernalversion);
 				mLogger.i("Kernel version from database is " + mSysParam.devinfo.kernelversion);
 			}
+			
+			/* If the screen width from database doesn't equal the one of system,
+			 * just use the latter.
+			 */
+			int sysscreenwidth = SysInfoHelper.getScreenWidth();
+			if (sysscreenwidth != mSysParam.devinfo.screenwidth) {
+				mSysParam.devinfo.screenwidth = sysscreenwidth;
+				DbHelper.getInstance().updateScreenWidth(sysscreenwidth);
+			}
+			
+			/* If the screen height from database doesn't equal the one of system,
+			 * just use the latter.
+			 */
+			int sysscreenheight = SysInfoHelper.getScreenHeight();
+			if (sysscreenheight != mSysParam.devinfo.screenheight) {
+				mSysParam.devinfo.screenheight = sysscreenheight;
+				DbHelper.getInstance().updateScreenHeight(sysscreenheight);
+			}
 
 			mReadWriteLock.writeLock().unlock();
 		}
@@ -142,16 +162,27 @@ public class SysParamManager {
 		
 		String softwareversion = SysInfoHelper.getSoftwareVersion();
 		String kernelversion = SysInfoHelper.getKernelVersion();
+		int screenwidth = SysInfoHelper.getScreenWidth();
+		int screenheight = SysInfoHelper.getScreenHeight();
 		mSysParam.devinfo.softwareversion = softwareversion;
 		mSysParam.devinfo.kernelversion = kernelversion;
-		
+		mSysParam.devinfo.screenwidth = screenwidth;
+		mSysParam.devinfo.screenheight = screenheight;
+
 		if (mSysParam.iadsinfo == null) {
 			mSysParam.iadsinfo = new IadsInfo();
 		}
 		mSysParam.iadsinfo.host = xmlsysparam.iadshost;
 		mSysParam.iadsinfo.port = xmlsysparam.iadsport;
 
-		DbHelper.getInstance().setSysParam(isinitial, xmlsysparam, softwareversion, kernelversion);
+		DbHelper.getInstance().setSysParam(isinitial, xmlsysparam, softwareversion, kernelversion,
+				screenwidth, screenheight);
+		
+		/////////////////////// Test Begin
+		//mSysParam.devinfo.pgmjsondata = "{'pgmid':'14651451251','pgmbill':[{'publishid':'dafjakdljfakd','template':{'width':1920,'height':1080,'area':[{'id':1,'type':1,'x':200,'y':200,'w':500,'h':300,'media':[{'id':1,'type':1,'name':'测试视频.mp4','path':'/Video/测试视频.mp4','sha1':'qeur13u88q'},{'id':2,'type':1,'name':'企业宣传片－沃林蓝莓企业宣传片_高清.mp4','path':'/Video/企业宣传片－沃林蓝莓企业宣传片_高清.mp4','sha1':'qeur13u88q'},{'id':3,'type':2,'duration':10,'name':'bg0001.jpg','path':'/Image/bg0001.jpg','sha1':'qeur13u88q'},{'id':4,'type':2,'duration':10,'name':'bg0002.jpg','path':'/Image/bg0002.jpg','sha1':'qeur13u88q'}]},{'id':2,'type':1,'x':900,'y':700,'w':500,'h':300,'media':[{'id':2,'type':1,'name':'企业宣传片－沃林蓝莓企业宣传片_高清.mp4','path':'/Video/企业宣传片－沃林蓝莓企业宣传片_高清.mp4','sha1':'qeur13u88q'},{'id':1,'type':1,'name':'测试视频.mp4','path':'/Video/测试视频.mp4','sha1':'qeur13u88q'},{'id':7,'type':2,'duration':10,'name':'bg0005.jpg','path':'/Image/bg0005.jpg','sha1':'qeur13u88q'},{'id':8,'type':2,'duration':10,'name':'bg0006.jpg','path':'/Image/bg0006.jpg','sha1':'qeur13u88q'}]}]},'playbill':[{'playbegindate':'2015-6-8','playenddate':'2015-6-8','playtimes':30}]}]}";
+		mSysParam.devinfo.pgmjsondata = "{'pgmid':'14651451251','pgmbill':[{'publishid':'dafjakdljfakd','template':{'width':1920,'height':1080,'area':[{'id':1,'type':1,'x':200,'y':200,'w':500,'h':300,'media':[{'id':1,'type':1,'name':'测试视频.mp4','path':'/Video/测试视频.mp4','sha1':'qeur13u88q'},{'id':3,'type':2,'duration':10,'name':'bg0001.jpg','path':'/Image/bg0001.jpg','sha1':'qeur13u88q'},{'id':4,'type':2,'duration':10,'name':'bg0002.jpg','path':'/Image/bg0002.jpg','sha1':'qeur13u88q'}]},{'id':2,'type':1,'x':900,'y':700,'w':500,'h':300,'media':[{'id':2,'type':1,'name':'企业宣传片－沃林蓝莓企业宣传片_高清.mp4','path':'/Video/企业宣传片－沃林蓝莓企业宣传片_高清.mp4','sha1':'qeur13u88q'},{'id':1,'type':1,'name':'测试视频.mp4','path':'/Video/测试视频.mp4','sha1':'qeur13u88q'},{'id':7,'type':2,'duration':10,'name':'bg0005.jpg','path':'/Image/bg0005.jpg','sha1':'qeur13u88q'}]}]},'playbill':[{'playbegindate':'2015-6-8','playenddate':'2015-6-8','playtimes':30}]},{'publishid':'134198514854928','template':{'width':1920,'height':1080,'area':[{'id':1,'type':1,'x':0,'y':0,'w':1920,'h':1080,'media':[{'id':1,'type':1,'name':'测试视频.mp4','path':'/Video/测试视频.mp4','sha1':'qeur13u88q'},{'id':3,'type':2,'duration':10,'name':'bg0001.jpg','path':'/Image/bg0001.jpg','sha1':'qeur13u88q'},{'id':4,'type':2,'duration':10,'name':'bg0002.jpg','path':'/Image/bg0002.jpg','sha1':'qeur13u88q'}]}]},'playbill':[{'playbegindate':'2015-6-11','playenddate':'2015-6-11','playtimes':10}]}]}";
+		DbHelper.getInstance().updatePgmInfo("135871", "ADFAJDKF9", mSysParam.devinfo.pgmjsondata);
+		/////////////////////// Test End
 
 		mReadWriteLock.writeLock().unlock();
 	}
@@ -214,6 +245,34 @@ public class SysParamManager {
 		mReadWriteLock.readLock().unlock();
 
 		return kernelversion;
+	}
+	
+	public int getScreenWidth() {
+		int screenwidth = -1;
+
+		mReadWriteLock.readLock().lock();
+
+		if (mSysParam.devinfo != null) {
+			screenwidth = mSysParam.devinfo.screenwidth;
+		}
+
+		mReadWriteLock.readLock().unlock();
+
+		return screenwidth;
+	}
+	
+	public int getScreenHeight() {
+		int screenheight = -1;
+
+		mReadWriteLock.readLock().lock();
+
+		if (mSysParam.devinfo != null) {
+			screenheight = mSysParam.devinfo.screenheight;
+		}
+
+		mReadWriteLock.readLock().unlock();
+
+		return screenheight;
 	}
 
 	public int getChargeReportPeriod() {

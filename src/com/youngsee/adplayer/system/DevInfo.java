@@ -10,6 +10,10 @@ public class DevInfo {
 	public String softwareversion;
 	/** Kernel version */
 	public String kernelversion;
+	/** Screen width */
+	public int screenwidth;
+	/** Screen height */
+	public int screenheight;
 	/** Terminal group */
 	public String terminalgroup;
 	/** Terminal name */
@@ -40,6 +44,8 @@ public class DevInfo {
 		model = null;
 		softwareversion = null;
 		kernelversion = null;
+		screenwidth = -1;
+		screenheight = -1;
 		terminalgroup = null;
 		terminalname = null;
 		chargereportperiod = -1;
@@ -59,6 +65,8 @@ public class DevInfo {
 		model = (info.model != null) ? new String(info.model) : null;
 		softwareversion = (info.softwareversion != null) ? new String(info.softwareversion) : null;
 		kernelversion = (info.kernelversion != null) ? new String(info.kernelversion) : null;
+		screenwidth = info.screenwidth;
+		screenheight = info.screenheight;
 		terminalgroup = (info.terminalgroup != null) ? new String(info.terminalgroup) : null;
 		terminalname = (info.terminalname != null) ? new String(info.terminalname) : null;
 		chargereportperiod = info.chargereportperiod;

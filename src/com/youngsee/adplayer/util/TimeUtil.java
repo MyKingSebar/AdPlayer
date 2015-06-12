@@ -3,6 +3,7 @@ package com.youngsee.adplayer.util;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import android.text.TextUtils;
 import android.text.format.Time;
 
 public class TimeUtil {
@@ -21,35 +22,33 @@ public class TimeUtil {
 	 * @return
 	 */
 	public static long getDateMillis(String dstr) {
-		if (dstr == null) {
-			sLogger.i("Date string is null.");
+		if (TextUtils.isEmpty(dstr)) {
+			sLogger.i("Date string is empty, dstr = " + dstr + ".");
 			return -1;
 		}
 
 		Pattern p = Pattern.compile(PATTERN_DATE);
 		Matcher m = p.matcher(dstr);
 		
-		if (m.find()) {
-			int year = Integer.parseInt(m.group(1));
-			int month = Integer.parseInt(m.group(2));
-			int day = Integer.parseInt(m.group(3));
-			
-			if ((month < 1) || (month > 12)
-					|| (day < 1) || (day > 31)) {
-				sLogger.i("Invalid date, dstr = " + dstr + ".");
-				return -1;
-			}
-	        
-	        Time t = new Time();
-	        t.set(day, month-1, year);
-	        t.normalize(true);
-
-	        return t.toMillis(true);
-		} else {
+		if (!m.find()) {
 			sLogger.i("Invalid date format, dstr = " + dstr + ".");
+			return -1;
 		}
 
-		return -1;
+		int year = Integer.parseInt(m.group(1));
+		int month = Integer.parseInt(m.group(2));
+		int day = Integer.parseInt(m.group(3));
+
+		if ((month < 1) || (month > 12) || (day < 1) || (day > 31)) {
+			sLogger.i("Invalid date, dstr = " + dstr + ".");
+			return -1;
+		}
+
+		Time t = new Time();
+		t.set(day, month - 1, year);
+		t.normalize(true);
+
+		return t.toMillis(true);
     }
 
 	/**
@@ -59,50 +58,46 @@ public class TimeUtil {
 	 * @return
 	 */
 	public static long getDatetimeMillis(String dtstr) {
-		if (dtstr == null) {
-			sLogger.i("Datetime string is null.");
+		if (TextUtils.isEmpty(dtstr)) {
+			sLogger.i("Datetime string is empty, dtstr = " + dtstr + ".");
 			return -1;
 		}
 
 		Pattern p = Pattern.compile(PATTERN_DATETIME);
 		Matcher m = p.matcher(dtstr);
 		
-		if (m.find()) {
-			int year = Integer.parseInt(m.group(1));
-			int month = Integer.parseInt(m.group(2));
-			int day = Integer.parseInt(m.group(3));
-			int hour = Integer.parseInt(m.group(4));
-			int minute = Integer.parseInt(m.group(5));
-			int second = Integer.parseInt(m.group(6));
-			
-			if ((month < 1) || (month > 12)
-					|| (day < 1) || (day > 31)
-					|| (hour > 24)
-					|| (minute > 59)
-					|| (second > 59)) {
-				sLogger.i("Invalid datetime, dtstr = " + dtstr + ".");
-				return -1;
-			}
-			
-			StringBuilder sb = new StringBuilder();
-			sb.append(year);
-	        sb.append((month < 10) ? ("0" + month) : month);
-	        sb.append((day < 10) ? ("0" + day) : day);
-	        sb.append("T");
-	        sb.append((hour < 10) ? ("0" + hour) : hour);
-	        sb.append((minute < 10) ? ("0" + minute) : minute);
-	        sb.append((second < 10) ? ("0" + second) : second);
-	        
-	        Time t = new Time();
-	        t.parse(sb.toString());
-	        t.normalize(true);
-
-	        return t.toMillis(true);
-		} else {
+		if (!m.find()) {
 			sLogger.i("Invalid datetime format, dtstr = " + dtstr + ".");
+			return -1;
+		}
+		
+		int year = Integer.parseInt(m.group(1));
+		int month = Integer.parseInt(m.group(2));
+		int day = Integer.parseInt(m.group(3));
+		int hour = Integer.parseInt(m.group(4));
+		int minute = Integer.parseInt(m.group(5));
+		int second = Integer.parseInt(m.group(6));
+
+		if ((month < 1) || (month > 12) || (day < 1) || (day > 31)
+				|| (hour > 24) || (minute > 59) || (second > 59)) {
+			sLogger.i("Invalid datetime, dtstr = " + dtstr + ".");
+			return -1;
 		}
 
-		return -1;
+		StringBuilder sb = new StringBuilder();
+		sb.append(year);
+		sb.append((month < 10) ? ("0" + month) : month);
+		sb.append((day < 10) ? ("0" + day) : day);
+		sb.append("T");
+		sb.append((hour < 10) ? ("0" + hour) : hour);
+		sb.append((minute < 10) ? ("0" + minute) : minute);
+		sb.append((second < 10) ? ("0" + second) : second);
+
+		Time t = new Time();
+		t.parse(sb.toString());
+		t.normalize(true);
+
+		return t.toMillis(true);
     }
 
 	/**

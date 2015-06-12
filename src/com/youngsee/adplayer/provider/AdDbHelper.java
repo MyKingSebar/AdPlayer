@@ -31,6 +31,8 @@ public class AdDbHelper extends SQLiteOpenHelper {
 				+ DbConstants.SPT_DEVICEMODEL + " TEXT DEFAULT NULL,"
 				+ DbConstants.SPT_SOFTWAREVERSION + " TEXT DEFAULT NULL,"
 				+ DbConstants.SPT_KERNELVERSION + " TEXT DEFAULT NULL,"
+				+ DbConstants.SPT_SCREENWIDTH + " INTEGER DEFAULT '-1',"
+				+ DbConstants.SPT_SCREENHEIGHT + " INTEGER DEFAULT '-1',"
 				+ DbConstants.SPT_TERMINALGROUP + " TEXT DEFAULT NULL,"
 				+ DbConstants.SPT_TERMINALNAME + " TEXT DEFAULT NULL,"
 				+ DbConstants.SPT_CHARGEREPORTPERIOD + " INTEGER DEFAULT '-1',"

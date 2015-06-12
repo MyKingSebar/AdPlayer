@@ -5,6 +5,8 @@ public class DbSysParam {
 	public String devicemodel;
 	public String softwareversion;
 	public String kernelversion;
+	public int screenwidth;
+	public int screenheight;
 	public String terminalgroup;
 	public String terminalname;
 	public int chargereportperiod;
@@ -33,6 +35,8 @@ public class DbSysParam {
         devicemodel = null;
         softwareversion = null;
         kernelversion = null;
+        screenwidth = -1;
+        screenheight = -1;
         terminalgroup = null;
         terminalname = null;
         chargereportperiod = -1;

@@ -10,9 +10,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,10 +23,12 @@ import org.apache.http.util.EncodingUtils;
 
 import com.youngsee.adplayer.AdApplication;
 import com.youngsee.adplayer.common.Constants;
+import com.youngsee.adplayer.common.FileInfo;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Environment;
+import android.text.TextUtils;
 
 @SuppressLint("DefaultLocale")
 public class FileUtils {
@@ -251,7 +256,42 @@ public class FileUtils {
         }
         return filename;
     }
-    
+
+    public static List<FileInfo> getFileInfo(String dir, boolean recursion) {
+		if (TextUtils.isEmpty(dir)) {
+			sLogger.i("Directory is empty.");
+			return null;
+		}
+
+		File f = new File(dir);
+		if (!f.exists()) {
+			sLogger.i("Directory doesn't exist.");
+			return null;
+		} else if (!f.isDirectory()) {
+			sLogger.i("Directory isn't a directory.");
+			return null;
+		}
+
+		File files[] = f.listFiles();
+		if (files == null) {
+			sLogger.i("File array is null.");
+			return null;
+		}
+
+		List<FileInfo> filelst = new ArrayList<FileInfo>();
+		for (File file : files) {
+			if (file.isFile()) {
+				FileInfo info = new FileInfo(
+						file.getAbsolutePath(), file.length(), file.lastModified());
+				filelst.add(info);
+			} else if (file.isDirectory() && recursion) {
+				filelst.addAll(getFileInfo(file.getAbsolutePath(), recursion));
+			}
+		}
+
+		return filelst;
+	}
+
     /**
      * 
      * 获取文件夹中所有的文件列表
@@ -862,41 +902,43 @@ public class FileUtils {
     }
 
     public static String readTextFile(String filePath) {
-        String dest = "";
+        String txt = null;
+
         InputStream is = null;
         BufferedReader reader = null;
         try {
-            String str = "";
             StringBuffer sb = new StringBuffer();
             is = new FileInputStream(filePath);
             reader = new BufferedReader(new InputStreamReader(is, ENCODING));
-            while ((str = reader.readLine()) != null) {
-                sb.append(str + "\n");
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
             }
             
-            // 去掉非法字符
+            // Remove invalid character.
             Pattern p = Pattern.compile("(\ufeff)");
             Matcher m = p.matcher(sb.toString());
-            dest = m.replaceAll("");
+            txt = m.replaceAll("");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        } catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
             try {
-                if (is != null) {
-                    is.close();
-                }
-                
                 if (reader != null) {
                     reader.close();
+                }
+                if (is != null) {
+                    is.close();
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
         
-        return dest;
+        return txt;
     }
     
     /**

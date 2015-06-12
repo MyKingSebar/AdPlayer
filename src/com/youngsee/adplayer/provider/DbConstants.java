@@ -21,6 +21,8 @@ public class DbConstants {
 	public static final String SPT_DEVICEMODEL = "devicemodel";
 	public static final String SPT_SOFTWAREVERSION = "softwareversion";
 	public static final String SPT_KERNELVERSION = "kernelversion";
+	public static final String SPT_SCREENWIDTH = "screenwidth";
+	public static final String SPT_SCREENHEIGHT = "screenheight";
 	public static final String SPT_TERMINALGROUP = "terminalgroup";
 	public static final String SPT_TERMINALNAME = "terminalname";
 	public static final String SPT_CHARGEREPORTPERIOD = "chargereportperiod";

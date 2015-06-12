@@ -12,35 +12,84 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.Enumeration;
+
 import com.youngsee.adplayer.AdApplication;
+
+import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.text.format.Time;
+import android.util.DisplayMetrics;
+import android.view.WindowManager;
 
 public class SysInfoHelper {
 	private static Logger sLogger = new Logger();
+	
+	/**
+	 * 获取屏幕宽度
+	 * 
+	 * @return 屏幕宽度
+	 */
+	public static int getScreenWidth() {
+		WindowManager wm = (WindowManager) AdApplication.getInstance().getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics dm = new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(dm);
+
+		return dm.widthPixels;
+	}
+	
+	/**
+	 * 获取屏幕高度
+	 * 
+	 * @return 屏幕高度
+	 */
+	public static int getScreenHeight() {
+		WindowManager wm = (WindowManager) AdApplication.getInstance().getSystemService(Context.WINDOW_SERVICE);
+		DisplayMetrics dm = new DisplayMetrics();
+		wm.getDefaultDisplay().getMetrics(dm);
+
+		return dm.heightPixels;
+	}
 	
 	/**
 	 * 获取软件版本号
 	 * 
 	 * @return 软件版本号
 	 */
-	public static String getSoftwareVersion() {
-		String softwareversion = null;
+	public static int getSoftwareVersionCode() {
 	    try {
 	        PackageManager pm = AdApplication.getInstance().getPackageManager();
 	        PackageInfo info = pm.getPackageInfo(AdApplication.getInstance().getPackageName(), 0);
-	        softwareversion = info.versionName;
-	    } catch (Exception e) {
+	        return info.versionCode;
+	    } catch (NameNotFoundException e) {
 	        e.printStackTrace();
 	    }
-	    return softwareversion;
+
+	    return -1;
 	}
 	
 	/**
-	 * 获取内核版本号
+	 * 获取软件版本
 	 * 
-	 * @return 内核版本号
+	 * @return 软件版本
+	 */
+	public static String getSoftwareVersion() {
+	    try {
+	        PackageManager pm = AdApplication.getInstance().getPackageManager();
+	        PackageInfo info = pm.getPackageInfo(AdApplication.getInstance().getPackageName(), 0);
+	        return info.versionName;
+	    } catch (NameNotFoundException e) {
+	        e.printStackTrace();
+	    }
+
+	    return null;
+	}
+	
+	/**
+	 * 获取内核版本
+	 * 
+	 * @return 内核版本
 	 */
 	public static String getKernelVersion() {
 		String kernelVersion = null;

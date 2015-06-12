@@ -10,4 +10,5 @@ public class AreaRef {
 	public int w = -1;
 	public int h = -1;
 	public List<MediaRef> medias = null;
+	public boolean finished = false;
 }
