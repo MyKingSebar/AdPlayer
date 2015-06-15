@@ -21,10 +21,14 @@ public abstract class AdView extends LinearLayout {
 	protected Logger mLogger = new Logger();
 
 	protected String mPublishId = null;
+	protected int mAreaId = -1;
 	protected int mAreaIndex = -1;
 	protected List<MediaRef> mMediaLst = null;
 	
 	protected Context mContext = null;
+	
+	protected int mWidth = -1;
+	protected int mHeight = -1;
 
 	public AdView(Context context) {
 		super(context);
@@ -45,12 +49,24 @@ public abstract class AdView extends LinearLayout {
     	mPublishId = publishid;
     }
 
+    public void setAreaId(int id) {
+    	mAreaId = id;
+    }
+
     public void setAreaIndex(int index) {
     	mAreaIndex = index;
     }
 
     public void setMediaList(List<MediaRef> lst) {
     	mMediaLst = lst;
+    }
+
+    public void setWidth(int width) {
+    	mWidth = width;
+    }
+
+    public void setHeight(int height) {
+    	mHeight = height;
     }
 
 	public abstract void onPause();

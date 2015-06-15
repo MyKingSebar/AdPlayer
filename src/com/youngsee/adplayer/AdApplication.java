@@ -54,13 +54,24 @@ public class AdApplication extends Application {
 	public static AdApplication getInstance() {
         return INSTANCE;
     }
-	
+
 	private void initSysCache() {
 		mMemoryCache = new LruCache<String, Bitmap>(
 				(int)Runtime.getRuntime().maxMemory() / MEMORYCACHEFACTOR) {
 			@Override
 			protected int sizeOf(String key, Bitmap bitmap) {
 				return bitmap.getByteCount();
+			}
+
+			@Override
+			protected void entryRemoved(boolean evicted, String key,
+					Bitmap oldBitmap, Bitmap newBitmap) {
+				if (evicted) {
+					if ((oldBitmap != null) && (!oldBitmap.isRecycled())) {
+						oldBitmap.recycle();
+						oldBitmap = null;
+					}
+				}
 			}
 		};
 
@@ -76,7 +87,7 @@ public class AdApplication extends Application {
 			e.printStackTrace();
 		}
 	}
-	
+
 	private File getDiskCacheDir(Context context, String uniqueName) {
 		String cachePath;
 
@@ -95,7 +106,7 @@ public class AdApplication extends Application {
         	mLogger.i("System memory cache is null");
             return null;
         }
-        
+
         return mMemoryCache.get(key);
     }
 
@@ -104,13 +115,14 @@ public class AdApplication extends Application {
         	mLogger.i("Bitmap has been in the system memeory cache.");
             return;
         }
-        
+
         mMemoryCache.put(key, bitmap);
     }
 
 	public void clearMemoryCache() {
         if (mMemoryCache != null) {
         	mMemoryCache.evictAll();
+        	System.gc();
         }
     }
 

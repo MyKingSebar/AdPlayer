@@ -6,8 +6,10 @@ public class Logger {
 
     private final static boolean logFlag = true;
 
-    public final static String tag = "[AdPlayer]";
+    private final static String tag = "[AdPlayer]";
     private final static int logLevel = Log.VERBOSE;
+    
+    private final StringBuffer sb = new StringBuffer();
 
     /**
      * Get The Current Function Name
@@ -27,8 +29,17 @@ public class Logger {
                 continue;
             }
 
-            return "{Thread:" + Thread.currentThread().getName() + "}" + "[ " + st.getFileName() + ":" + st.getLineNumber() + " "
-                    + st.getMethodName() + " ]";
+            sb.setLength(0);
+            sb.append("{Thread:");
+            sb.append(Thread.currentThread().getName());
+            sb.append("}[ ");
+            sb.append(st.getFileName());
+            sb.append(":");
+            sb.append(st.getLineNumber());
+            sb.append(" ");
+            sb.append(st.getMethodName());
+            sb.append(" ]");
+            return sb.toString();
         }
 
         return null;
@@ -43,7 +54,11 @@ public class Logger {
         if (logFlag && logLevel <= Log.INFO) {
             String name = getFunctionName();
             if (name != null) {
-                Log.i(tag, name + " - " + str);
+            	sb.setLength(0);
+            	sb.append(name);
+            	sb.append(" - ");
+            	sb.append(str);
+                Log.i(tag, sb.toString());
             } else {
                 Log.i(tag, str.toString());
             }
@@ -59,7 +74,11 @@ public class Logger {
         if (logFlag && logLevel <= Log.DEBUG) {
             String name = getFunctionName();
             if (name != null) {
-                Log.d(tag, name + " - " + str);
+            	sb.setLength(0);
+            	sb.append(name);
+            	sb.append(" - ");
+            	sb.append(str);
+                Log.d(tag, sb.toString());
             } else {
                 Log.d(tag, str.toString());
             }
@@ -75,7 +94,11 @@ public class Logger {
         if (logFlag && logLevel <= Log.VERBOSE) {
             String name = getFunctionName();
             if (name != null) {
-                Log.v(tag, name + " - " + str);
+            	sb.setLength(0);
+            	sb.append(name);
+            	sb.append(" - ");
+            	sb.append(str);
+                Log.v(tag, sb.toString());
             } else {
                 Log.v(tag, str.toString());
             }
@@ -91,7 +114,11 @@ public class Logger {
         if (logFlag && logLevel <= Log.WARN) {
             String name = getFunctionName();
             if (name != null) {
-                Log.w(tag, name + " - " + str);
+            	sb.setLength(0);
+            	sb.append(name);
+            	sb.append(" - ");
+            	sb.append(str);
+                Log.w(tag, sb.toString());
             } else {
                 Log.w(tag, str.toString());
             }
@@ -107,7 +134,11 @@ public class Logger {
         if (logFlag && logLevel <= Log.ERROR) {
             String name = getFunctionName();
             if (name != null) {
-                Log.e(tag, name + " - " + str);
+            	sb.setLength(0);
+            	sb.append(name);
+            	sb.append(" - ");
+            	sb.append(str);
+                Log.e(tag, sb.toString());
             } else {
                 Log.e(tag, str.toString());
             }
@@ -134,7 +165,15 @@ public class Logger {
     public void e(String log, Throwable tr) {
         if (logFlag) {
             String line = getFunctionName();
-            Log.e(tag, "{Thread:" + Thread.currentThread().getName() + "}" + "[" + line + ":] " + log + "\n", tr);
+            sb.setLength(0);
+            sb.append("{Thread:");
+            sb.append(Thread.currentThread().getName());
+            sb.append("}[ ");
+            sb.append(line);
+            sb.append(":] ");
+            sb.append(log);
+            sb.append("\n");
+            Log.e(tag, sb.toString(), tr);
         }
     }
 

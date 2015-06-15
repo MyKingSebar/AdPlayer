@@ -45,9 +45,10 @@ public class AdMultiMediaView extends AdView {
 
 	private final int EVENT_BASE = 0x9000;
 	private final int EVENT_SHOWPROGBAR = EVENT_BASE + 0;
-	private final int EVENT_PLAYVIDEO = EVENT_BASE + 1;
-	private final int EVENT_SHOWPICTURE = EVENT_BASE + 2;
-	private final int EVENT_HIDEALLVIEWS = EVENT_BASE + 3;
+	private final int EVENT_SHOWSURFACEVIEW = EVENT_BASE + 1;
+	private final int EVENT_PLAYVIDEO = EVENT_BASE + 2;
+	private final int EVENT_PLAYPICTURE = EVENT_BASE + 3;
+	private final int EVENT_HIDEALLVIEWS = EVENT_BASE + 4;
 
 	private final long DEFAULT_MEDIA_DURATION = 1000;
 
@@ -79,6 +80,8 @@ public class AdMultiMediaView extends AdView {
 	private int mMediaPosition = -1;
 	
 	private boolean mSkipMedia = false;
+	
+	private boolean mIsSurfaceReady = false;
 
 	public AdMultiMediaView(Context context) {
 		super(context);
@@ -112,7 +115,8 @@ public class AdMultiMediaView extends AdView {
 		@Override
 		public void surfaceCreated(SurfaceHolder holder) {
 			mLogger.i("Surface is created.");
-			if (mCurrentMedia != null) {
+			mIsSurfaceReady = true;
+			if ((mCurrentMedia != null) && (mCurrentMedia.type == Constants.MEDIATYPE_VIDEO)) {
 				playVideo(mCurrentMedia);
 			}
 		}
@@ -128,6 +132,7 @@ public class AdMultiMediaView extends AdView {
 				mMediaPlayer.release();
 	            mMediaPlayer = null;
 			}
+			mIsSurfaceReady = false;
 		}
 		
 	}
@@ -211,12 +216,15 @@ public class AdMultiMediaView extends AdView {
             mMediaPlayer.release();
             mMediaPlayer = null;
         }
+		clearImageView();
 	}
 	
 	private void cleanupMsg() {
     	mHandler.removeMessages(EVENT_SHOWPROGBAR);
+    	mHandler.removeMessages(EVENT_SHOWSURFACEVIEW);
     	mHandler.removeMessages(EVENT_PLAYVIDEO);
-    	mHandler.removeMessages(EVENT_SHOWPICTURE);
+    	mHandler.removeMessages(EVENT_PLAYPICTURE);
+    	mHandler.removeMessages(EVENT_HIDEALLVIEWS);
     }
 
 	@Override
@@ -286,7 +294,11 @@ public class AdMultiMediaView extends AdView {
 	private void showProgressBar() {
 		mHandler.sendEmptyMessage(EVENT_SHOWPROGBAR);
 	}
-	
+
+	private void showSurfaceView() {
+		mHandler.sendEmptyMessage(EVENT_SHOWSURFACEVIEW);
+	}
+
 	private void playVideo(MediaRef media) {
 		mLogger.i("Play video '" + media.localpath + "'.");
 
@@ -299,7 +311,7 @@ public class AdMultiMediaView extends AdView {
 	private Bitmap getImage(String file) {
 		Bitmap img = AdApplication.getInstance().getBitmapFromMemoryCache(file);
 		if (img == null) {
-			img = BitmapUtil.decodeFile(file, getWidth(), getHeight());
+			img = BitmapUtil.decodeFile(file, mWidth, mHeight);
 			if (img != null) {
 				AdApplication.getInstance().addBitmapToMemoryCache(file, img);
 			}
@@ -307,10 +319,10 @@ public class AdMultiMediaView extends AdView {
 		
 		return img;
 	}
-	
+
 	private void showPicture(Bitmap pic, int mode) {
 		Message msg = mHandler.obtainMessage();
-		msg.what = EVENT_SHOWPICTURE;
+		msg.what = EVENT_PLAYPICTURE;
 		msg.obj = pic;
 		msg.arg1 = mode;
 		msg.sendToTarget();
@@ -386,8 +398,8 @@ public class AdMultiMediaView extends AdView {
         paint.setAntiAlias(true);
         paint.setFilterBitmap(true);
 
-        int viewwidth = getWidth() - 10;
-        int viewheight = getHeight();
+        int viewwidth = mWidth - 10;
+        int viewheight = mHeight;
         FontMetrics fm = paint.getFontMetrics();
         float lineheight = (float)Math.ceil(fm.descent - fm.ascent);
         int linesperpage = (int)(viewheight / (lineheight + fm.leading));
@@ -440,8 +452,9 @@ public class AdMultiMediaView extends AdView {
 	}
 
 	private class MyThread extends Thread {
-        private Object   mPauseLock = new Object();
-        private boolean  mPauseFlag = false;
+        private Object mPauseLock = new Object();
+        private boolean mPauseFlag = false;
+        private boolean mIsCanceled = false;
         
         public MyThread() {
 
@@ -449,6 +462,7 @@ public class AdMultiMediaView extends AdView {
 
         public void cancel() {
         	mLogger.i("Cancel the multimedia thread.");
+        	mIsCanceled = true;
             this.interrupt();
         }
         
@@ -477,7 +491,7 @@ public class AdMultiMediaView extends AdView {
             
             MediaRef media = null;
             
-            while (!isInterrupted()) {
+            while (!isInterrupted() && !mIsCanceled) {
                 try {
                 	synchronized (mPauseLock) {
                         if (mPauseFlag) {
@@ -529,6 +543,13 @@ public class AdMultiMediaView extends AdView {
 							mIsPlayingVideo = true;
 							mCurrentMedia = media;
 							FileUtils.updateFileLastTime(media.localpath);
+
+							if (!mIsSurfaceReady) {
+								showSurfaceView();
+								while (!mIsSurfaceReady) {
+									Thread.sleep(DEFAULT_THREAD_QUICKPERIOD);
+								}
+							}
 
 							playVideo(media);
 
@@ -596,7 +617,7 @@ public class AdMultiMediaView extends AdView {
         }
     }
 
-	private void doPlayVideo(MediaRef media) {
+	private void doShowSurfaceView() {
 		if (mCurrentShowType != SHOWTYPE_VIDEO) {
 			mProgBarLyt.setVisibility(View.GONE);
 			mSurfaceView.setVisibility(View.VISIBLE);
@@ -604,14 +625,16 @@ public class AdMultiMediaView extends AdView {
 
 			mCurrentShowType = SHOWTYPE_VIDEO;
         }
+	}
 
+	private void doPlayVideo(MediaRef media) {
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setOnPreparedListener(mMediaPlayerPreparedListener);
             mMediaPlayer.setOnCompletionListener(mMediaPlayerCompletionListener);
             mMediaPlayer.setOnErrorListener(mMediaPlayerErrorListener);
         }
-        
+
         try {
         	stopVideo();
             mMediaPlayer.reset();
@@ -623,7 +646,6 @@ public class AdMultiMediaView extends AdView {
 			e.printStackTrace();
 			mIsPlayingVideo = false;
 		}
-        
     }
 
 	private void updateAnimation(int mode) {
@@ -735,16 +757,21 @@ public class AdMultiMediaView extends AdView {
 
 			mCurrentShowType = SHOWTYPE_PICTURE;
         }
-		
+
 		BitmapDrawable imgdwb = new BitmapDrawable(mContext.getResources(), img);
         updateAnimation(mode);
         mImageSwitcher.setImageDrawable(imgdwb);
 	}
-	
+
 	private void doHideAllViews() {
 		mProgBarLyt.setVisibility(View.GONE);
 		mSurfaceView.setVisibility(View.GONE);
 		mImageSwitcher.setVisibility(View.GONE);
+	}
+
+	private void clearImageView() {
+		mImageSwitcher.clearAnimation();
+		mImageSwitcher.removeAllViews();
 	}
 
 	private final Handler mHandler = new Handler() {
@@ -753,15 +780,19 @@ public class AdMultiMediaView extends AdView {
 			switch (msg.what) {
 			case EVENT_SHOWPROGBAR:
 				doShowProgressBar();
-				
+
+				break;
+			case EVENT_SHOWSURFACEVIEW:
+				doShowSurfaceView();
+
 				break;
 			case EVENT_PLAYVIDEO:
 				doPlayVideo((MediaRef)msg.obj);
-				
+
 				break;
-			case EVENT_SHOWPICTURE:
+			case EVENT_PLAYPICTURE:
 				doShowPicture((Bitmap)msg.obj, msg.arg1);
-				
+
 				break;
 			case EVENT_HIDEALLVIEWS:
 				doHideAllViews();

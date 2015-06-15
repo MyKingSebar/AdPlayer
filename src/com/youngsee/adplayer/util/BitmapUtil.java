@@ -15,7 +15,7 @@ public class BitmapUtil {
 	    return (int)(((options.outWidth / (float)reqWidth)
 	    		+ (options.outHeight / (float)reqHeight)) / 2);
 	}
-	
+
 	private static void fillOptions(BitmapFactory.Options options, int reqWidth, int reqHeight) {
 		options.inSampleSize = calculateInSampleSize(options, reqWidth, reqHeight);
 		options.inPreferredConfig = Bitmap.Config.RGB_565;
@@ -32,7 +32,16 @@ public class BitmapUtil {
 	    fillOptions(options, reqWidth, reqHeight);
 
 	    options.inJustDecodeBounds = false;
-	    return BitmapFactory.decodeResource(res, resId, options);
+
+	    Bitmap bitmap = null;
+	    try {
+	    	bitmap = BitmapFactory.decodeResource(res, resId, options);
+	    } catch (OutOfMemoryError e) {
+	    	e.printStackTrace();
+	    	System.gc();
+	    }
+
+	    return bitmap;
 	}
 	
 	public static Bitmap decodeFile(String file, int reqWidth, int reqHeight) {
@@ -44,7 +53,15 @@ public class BitmapUtil {
 
 	    options.inJustDecodeBounds = false;
 
-	    return BitmapFactory.decodeFile(file, options);
+	    Bitmap bitmap = null;
+	    try {
+	    	bitmap = BitmapFactory.decodeFile(file, options);
+	    } catch (OutOfMemoryError e) {
+	    	e.printStackTrace();
+	    	System.gc();
+	    }
+
+	    return bitmap;
 	}
 
 }

@@ -223,8 +223,18 @@ public class AdMainActivity extends Activity {
     	return true;
     }
 
+    private void startViews() {
+    	if (mViewInfoLst != null) {
+	    	for (AdViewInfo info : mViewInfoLst) {
+	    		info.view.start();
+	    	}
+    	}
+    }
+
     private void createAreas(PgmBillRef pgmbill) {
     	cleanupLayout();
+
+    	AdApplication.getInstance().clearMemoryCache();
 
     	int viewsize = pgmbill.areas.size();
     	mLogger.i("Create views, size = " + viewsize + ".");
@@ -252,19 +262,22 @@ public class AdMainActivity extends Activity {
 
     		if (adview != null) {
     			adview.setPublishId(pgmbill.publishid);
+    			adview.setAreaId(area.id);
     			adview.setAreaIndex(i);
     			adview.setMediaList(area.medias);
+    			adview.setWidth(area.w);
+    			adview.setHeight(area.h);
 
 				adview.setX(area.x);
 				adview.setY(area.y);
 				mFrameLayout.addView(adview, area.w, area.h);
-				
-				adview.start();
 
 				viewinfo = new AdViewInfo(area.id, area.type, area.x, area.y, area.w, area.h, adview);
 				mViewInfoLst.add(viewinfo);
     		}
     	}
+
+    	startViews();
     }
 
     private void stopViews() {
@@ -293,6 +306,7 @@ public class AdMainActivity extends Activity {
     					&& (area.w == viewinfo.w)
     					&& (area.h == viewinfo.h)) {
     				viewinfo.view.setPublishId(pgmbill.publishid);
+    				viewinfo.view.setAreaId(area.id);
     				viewinfo.view.setAreaIndex(j);
     				viewinfo.view.setMediaList(area.medias);
 
@@ -320,8 +334,6 @@ public class AdMainActivity extends Activity {
     	}
 
     	if (!compareAreas(pgmbill)) {
-    		AdApplication.getInstance().clearMemoryCache();
-
     		createAreas(pgmbill);
     	} else {
     		updateAreas(pgmbill);
