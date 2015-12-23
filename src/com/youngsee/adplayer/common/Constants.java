@@ -17,8 +17,8 @@ public class Constants {
 	
 	public static final int AREATYPE_MULTIMEDIA = 1;
 
-	public static final int MEDIATYPE_VIDEO = 1;
-	public static final int MEDIATYPE_IMAGE = 2;
+	public static final int MEDIATYPE_VIDEO = 2;
+	public static final int MEDIATYPE_IMAGE = 1;
 	public static final int MEDIATYPE_TEXT = 3;
 	
 	public static final int MEDIAMODE_NONE = 0;

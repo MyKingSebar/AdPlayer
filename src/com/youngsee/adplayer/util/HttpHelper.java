@@ -25,30 +25,30 @@ public class HttpHelper {
 
 	private static final int DEFAULT_CONNECT_TIMEOUT = 10 * 1000;
 	private static final int DEFAULT_READ_TIMEOUT = 10 * 1000;
-	
+
 	private static final String REQUESTMETHOD_GET = "GET";
 	private static final String REQUESTMETHOD_POST = "POST";
 
 	private static final String REQUESTPROPERTY_KEY_ACCEPT = "Accept";
 	private static final String REQUESTPROPERTY_KEY_CONTTYPE = "Content-Type";
-	
+
 	private static final String REQUESTPROPERTY_VALUE_APPJSON = "application/json";
-	
+
 	private static final String DEFAULT_CHARSET = "UTF-8";
 
 	private static final String HTTP_PREFIX = "http://";
 	private static final String HTTPS_PREFIX = "https://";
-	
+
 	private static final int REQUESTPORT_TOKEN = 8443;
-	private static final int REQUESTPORT_DATA = 8080;
-	
+	private static final int REQUESTPORT_DATA = 8888;
+
 	private static final String SERVERLABEL_IADS = "IADS";
 	private static final String SERVERLABEL_SMS = "SMS";
 	private static final String SERVERLABEL_AMPS = "AMPS";
-	
+
 	private static final String TOKENURL_MIDPART = "/oauth/token?client_id=";
 	private static final String TOKENURL_SUFFIX = "&client_secret=secret_1&grant_type=client_credentials";
-	
+
 	private static final String DATAURL_MIDPART_IADS_SERVERINFO = "/services/iadsservice/authorise?access_token=";
 	private static final String DATAURL_MIDPART_SMS_CHARGE = "/services/smsservice/charge?access_token=";
 	private static final String DATAURL_MIDPART_AMPS_SYSINFO = "/services/ampsservice/sysinfo?access_token=";

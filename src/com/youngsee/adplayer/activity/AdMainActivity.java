@@ -333,11 +333,12 @@ public class AdMainActivity extends Activity {
     		return;
     	}
 
-    	if (!compareAreas(pgmbill)) {
+    	/*if (!compareAreas(pgmbill)) {
     		createAreas(pgmbill);
     	} else {
     		updateAreas(pgmbill);
-    	}
+    	}*/
+    	createAreas(pgmbill);
     }
 
     public void showStandbyPgm() {

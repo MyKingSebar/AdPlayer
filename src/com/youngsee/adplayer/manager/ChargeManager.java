@@ -207,6 +207,7 @@ public class ChargeManager {
 			if (!found) {
 				PublishInfo publishinfo = new PublishInfo();
 				publishinfo.publishid = chargeinfo.publishid;
+				publishinfo.playlst = new ArrayList<PlayInfo>();
 
 				PlayInfo playinfo = new PlayInfo();
 				playinfo.playdate = chargeinfo.playdate;
@@ -268,6 +269,8 @@ public class ChargeManager {
 			} else {
 				mLogger.i("Play list is null, publishinfo.publishid = " + publishinfo.publishid + ".");
 			}
+
+			chargebills.add(chargebill);
 		}
 		
 		if (chargebills.size() > 0) {

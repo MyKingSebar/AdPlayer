@@ -47,7 +47,7 @@ public class WXBizMsgCrypt {
 
 		this.token = token;
 		this.appId = appId;
-		aesKey = Base64.decodeBase64(encodingAesKey + "=");
+		aesKey = Base64.decodeBase64((encodingAesKey + "=").getBytes());
 	}
 
 	// 生成4个字节的网络字节序
@@ -120,7 +120,7 @@ public class WXBizMsgCrypt {
 			byte[] encrypted = cipher.doFinal(unencrypted);
 
 			// 使用BASE64对加密后的字符串进行编码
-			String base64Encrypted = base64.encodeToString(encrypted);
+			String base64Encrypted = new String(Base64.encodeBase64(encrypted));
 
 			return base64Encrypted;
 		} catch (Exception e) {
@@ -146,7 +146,7 @@ public class WXBizMsgCrypt {
 			cipher.init(Cipher.DECRYPT_MODE, key_spec, iv);
 
 			// 使用BASE64对密文进行解码
-			byte[] encrypted = Base64.decodeBase64(text);
+			byte[] encrypted = Base64.decodeBase64(text.getBytes());
 
 			// 解密
 			original = cipher.doFinal(encrypted);

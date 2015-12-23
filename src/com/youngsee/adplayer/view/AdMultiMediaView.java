@@ -217,6 +217,8 @@ public class AdMultiMediaView extends AdView {
             mMediaPlayer = null;
         }
 		clearImageView();
+
+		super.onDestroy();
 	}
 	
 	private void cleanupMsg() {
@@ -300,7 +302,7 @@ public class AdMultiMediaView extends AdView {
 	}
 
 	private void playVideo(MediaRef media) {
-		mLogger.i("Play video '" + media.localpath + "'.");
+		mLogger.i("Play video '" + media.localpath + " (" + media.name + ")'.");
 
 		Message msg = mHandler.obtainMessage();
 		msg.what = EVENT_PLAYVIDEO;
@@ -329,7 +331,7 @@ public class AdMultiMediaView extends AdView {
 	}
 	
 	private void playImage(MediaRef media) {
-		mLogger.i("Play image '" + media.localpath + "'.");
+		mLogger.i("Play image '" + media.localpath + " (" + media.name + ")'.");
 
 		Bitmap img = getImage(media.localpath);
 
@@ -372,7 +374,7 @@ public class AdMultiMediaView extends AdView {
     }
 	
 	private void playText(MediaRef media) throws InterruptedException {
-		mLogger.i("Play text '" + media.localpath + "'.");
+		mLogger.i("Play text '" + media.localpath + " (" + media.name + ")'.");
 
 		String txt = getText(media.localpath);
 		if (TextUtils.isEmpty(txt)) {
@@ -527,7 +529,8 @@ public class AdMultiMediaView extends AdView {
 
 							continue;
 						} else if (!FileUtils.isExist(media.localpath) || !isMediaValid(media)) {
-							mLogger.i(media.localpath + " doesn't exist or is invalid, skip it.");
+							mLogger.i(media.localpath + " (" + media.name + ")"
+									+ " doesn't exist or is invalid, skip it.");
 							if ((mCurrentShowType != SHOWTYPE_PROGBAR) && noMediaExistsOrValid()) {
 								showProgressBar();
 							}

@@ -444,9 +444,7 @@ public class DbHelper {
 		long currentdatemillis = TimeUtil.getCurrentDateMillis();
 		for (DbChargeInfo info : infolst) {
 			long datemillis = TimeUtil.getDateMillis(info.playdate);
-			if ((datemillis < currentdatemillis)
-					|| ((datemillis == currentdatemillis)
-					&& (info.currentplaytimes >= info.totalplaytimes) )) {
+			if (datemillis < currentdatemillis) {
 				StringBuilder sb = new StringBuilder();
 				sb.append(DbConstants.CIT_PUBLISHID).append("='").append(info.publishid).append("'");
 				sb.append(" AND ");

@@ -71,7 +71,11 @@ public abstract class AdView extends LinearLayout {
 
 	public abstract void onPause();
     public abstract void onResume();
-    public abstract void onDestroy();
+
+    public void onDestroy() {
+    	mPublishId = null;
+    	mMediaLst = null;
+    }
 
     public abstract void start();
     public abstract void stop();
@@ -80,7 +84,7 @@ public abstract class AdView extends LinearLayout {
     	if (mMediaLst != null) {
 	        for (MediaRef media : mMediaLst) {
 	            if (FileUtils.isExist(media.localpath)
-	            		&& media.sha1.equals(Sha1Util.getFileSignature(media.localpath))) {              
+	            		/*&& media.sha1.equals(Sha1Util.getFileSignature(media.localpath))*/) {              
 	            	return false;
 	            }
 	        }
@@ -90,8 +94,8 @@ public abstract class AdView extends LinearLayout {
     }
     
     protected boolean isMediaValid(MediaRef media) {
-    	//return media.sha1.equals(Sha1Util.getFileSignature(media.localpath));
     	return true;
+    	//return media.sha1.equals(Sha1Util.getFileSignature(media.localpath));
     }
     
     protected int getFontColor(String fcstr) {
@@ -114,8 +118,8 @@ public abstract class AdView extends LinearLayout {
     }
     
     private FtpFileInfo getDownloadInfo(MediaRef media) {
-		if (FileUtils.isExist(media.localpath)
-				&& media.sha1.equals(Sha1Util.getFileSignature(media.localpath))) {
+		if (FileUtils.isExist(media.localpath)/* && (media.sha1 != null)
+				&& media.sha1.equals(Sha1Util.getFileSignature(media.localpath))*/) {
 			mLogger.i("Media has been existing. No need to download.");
 			return null;
 		}

@@ -763,8 +763,8 @@ public class FtpHelper {
             String saveFilePath = sb.toString();
 
             // 文件是否已存在
-            if (FileUtils.isExist(saveFilePath) && fInfo.getSignature() != null &&
-                fInfo.getSignature().equals(Sha1Util.getFileSignature(saveFilePath))) {
+            if (FileUtils.isExist(saveFilePath) /*&& fInfo.getSignature() != null &&
+                fInfo.getSignature().equals(Sha1Util.getFileSignature(saveFilePath))*/) {
             	mLogger.i("File is already exist.");
                 return true;
             }

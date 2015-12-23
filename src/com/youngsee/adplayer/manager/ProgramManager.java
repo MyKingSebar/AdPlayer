@@ -234,7 +234,8 @@ public class ProgramManager {
 								mediaref.name = media.getName();
 								mediaref.remotepath = media.getPath();
 								mediaref.localpath = getMediaLocalPath(mediaref.type)
-										+ File.separator + mediaref.name;
+										+ File.separator
+										+ FileUtils.getFilename(mediaref.remotepath);
 								mediaref.sha1 = media.getSha1();
 								mediaref.playtimes = 0;
 

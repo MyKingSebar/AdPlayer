@@ -8,6 +8,7 @@ public class SysInfoResp {
 	private int chargeReportPeriod;
 	private int heartbeatPeriod;
 	private FtpParam ftpParam;
+	private int status;
 	
 	@JSONField(name = "terminalgroup")
 	public String getTerminalGroup() {
@@ -57,5 +58,15 @@ public class SysInfoResp {
 	@JSONField(name = "ftpparam")
 	public void setFtpParam(FtpParam ftpParam) {
 		this.ftpParam = ftpParam;
+	}
+
+	@JSONField(name = "status")
+	public int getStatus() {
+		return status;
+	}
+
+	@JSONField(name = "status")
+	public void setStatus(int status) {
+		this.status = status;
 	}
 }

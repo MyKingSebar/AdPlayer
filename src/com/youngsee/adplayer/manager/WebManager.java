@@ -255,17 +255,17 @@ public class WebManager {
 					mLogger.i("Decrypted message is null.");
 					return null;
 				}
-				
+
 				return decryptmsg;
 			} else {
 				mLogger.i("Response code of server(servicetype=" + servicetype + ") is "
 						+ resp.code + ".");
 			}
 		}
-		
+
 		return null;
 	}
-	
+
 	private void requestServerInfo(String host, String deviceid) {
 		if (host == null) {
 			mLogger.e("Host is null.");
@@ -360,14 +360,14 @@ public class WebManager {
 		reqdata.setDisk(SysInfoHelper.getDiskInfo());
 		reqdata.setCpu(SysInfoHelper.getCpuUsage());
 		reqdata.setMemory(SysInfoHelper.getMemoryUsage());
-		
+
 		String pgmid = SysParamManager.getInstance().getPgmId();
 		if (pgmid != null) {
 			PgmInfo pgminfo = new PgmInfo();
 			pgminfo.setId(pgmid);
 			reqdata.setPgmInfo(pgminfo);
 		}
-		
+
 		if (FtpHelper.getInstance().ftpDownloadIsWorking()) {
 			DlFileInfo dlfileinfo = new DlFileInfo();
 			dlfileinfo.setFilename(FtpHelper.getInstance().getDownloadFileName());
@@ -377,7 +377,7 @@ public class WebManager {
 		} else {
 			reqdata.setDlFileInfo(null);
 		}
-		
+
 		if (FtpHelper.getInstance().ftpUploadIsWorking()) {
 			UlFileInfo ulfileinfo = new UlFileInfo();
 			ulfileinfo.setFilename(FtpHelper.getInstance().getUploadFileName());
@@ -387,20 +387,20 @@ public class WebManager {
 		} else {
 			reqdata.setUlFileInfo(null);
 		}
-		
+
 		String reqstr = JsonHelper.jsonObjectToString(reqdata);
 		if (reqstr == null) {
 			mLogger.e("Request string is null.");
 			return;
 		}
-		
+
 		String respstr = requestServerData(Constants.SERVICETYPE_AMPS_HEARTBEAT, host,
 				deviceid, reqstr);
 		if (respstr == null) {
 			mLogger.i("Response string of heartbeat is null.");
 			return;
 		}
-		
+
 		HeartBeatInfoResp respdata = JsonHelper.getObject(respstr, HeartBeatInfoResp.class);
 		if (respdata == null) {
 			mLogger.i("Response data of heartbeat is null.");
@@ -409,7 +409,7 @@ public class WebManager {
 
 		WebCmdHelper.getInstance().handleCmd(host, deviceid, respdata);
 	}
-	
+
 	public boolean downloadPgmList(String host, String deviceid) {
 		if (host == null) {
 			mLogger.e("Host is null.");
@@ -419,16 +419,16 @@ public class WebManager {
 			mLogger.e("Device id is null.");
 			return false;
 		}
-		
+
 		PgmListInfo reqdata = new PgmListInfo();
 		reqdata.setDeviceId(deviceid);
-		
+
 		String reqstr = JsonHelper.jsonObjectToString(reqdata);
 		if (reqstr == null) {
 			mLogger.e("Request string is null.");
 			return false;
 		}
-		
+
 		String respstr = requestServerData(Constants.SERVICETYPE_AMPS_PGMLIST, host,
 				deviceid, reqstr);
 		if (respstr == null) {
@@ -437,9 +437,9 @@ public class WebManager {
 		}
 		mLogger.i("Downloaded program list:");
 		mLogger.i(respstr);
-		
+
 		String respstrsha1 = Sha1Util.getSignature(respstr);
-		
+
 		String currentpgmsha1 = SysParamManager.getInstance().getPgmSha1();
 		if ((currentpgmsha1 == null) || !currentpgmsha1.equals(respstrsha1)) {
 			PgmListInfoResp respdata = JsonHelper.getObject(respstr, PgmListInfoResp.class);
@@ -480,11 +480,7 @@ public class WebManager {
 			mLogger.e("Command result is invalid, cmdresult = " + cmdresult + ".");
 			return;
 		}
-		if (param == null) {
-			mLogger.e("Command parameter is null.");
-			return;
-		}
-		
+
 		CmdResult reqdata = new CmdResult();
 		reqdata.setDeviceId(deviceid);
 		reqdata.setType(cmdtype);
@@ -562,7 +558,7 @@ public class WebManager {
 						
 						if (mHasGotSysInfo) {
 							doHeartBeat(ampsinfo.host, deviceid);
-							
+
 							hbperiod = SysParamManager.getInstance().getHeartbeatPeriod();
 							if (hbperiod >= 1) {
 								Thread.sleep(hbperiod * 1000);
